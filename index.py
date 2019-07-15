@@ -1,7 +1,18 @@
 import os
-
-def ajout_element(element,texte): #PERMET L'AJOUT DE PARAGRAPHE (le reste nécessite une autre fonction car pas adapter)
+def print_where():
     choix = input("Ou voulez-vous ajouter votre élément ?")
+    return choix
+
+def ajout_hyperlien(texte):
+    choix = input('donnez votre URL')
+    texte = '<a href="{}">{}</a>'.format(choix, texte)
+    return texte
+
+def ajout_element(element,texte): #PERMET L'AJOUT DE <p> <span> <div> (nécessite l'intégration du <li>) (le reste nécessite une autre fonction car pas adapter)
+    hyper = input("Voulez-vous un lien sur votre élément ?")
+    if hyper == "oui":
+        texte = ajout_hyperlien(texte)
+    choix = print_where()
     fd = open('index.html', 'r')
     oui = fd.readlines()
     fd.close()
@@ -25,7 +36,7 @@ def ajout_element(element,texte): #PERMET L'AJOUT DE PARAGRAPHE (le reste néces
     fd.close()
 
 def ajout_menu(): #AJOUTE UN MENU MAIS SANS LES HYPERLIENS POUR L'INSTANT (nécessite une fonction pour créer les hyperliens)
-    choix = input("Ou voulez-vous ajouter votre menu ? (préféré dans l'entete du site)")
+    choix = print_where()
     fd = open('index.html', 'r')
     oui = fd.readlines()
     fd.close()
