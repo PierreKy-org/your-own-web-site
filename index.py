@@ -47,6 +47,7 @@ def ajout_menu(): #AJOUTE UN MENU MAIS SANS LES HYPERLIENS POUR L'INSTANT (néce
             nombre = int(input("Combien voulez-vous de lien ? :"))
             for j in range(1,nombre+1):
                 texte = input("Le nom de votre lien :")
+                texte = ajout_hyperlien(texte)
                 oui.insert(i+1+j, '<li>{}</li>\n'.format(texte))
             oui.insert(i+2+nombre, '</ul>\n')
     fd = open('index.html', 'w')
