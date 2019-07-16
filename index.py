@@ -13,7 +13,7 @@ def ajout_element(element,texte): #PERMET L'AJOUT DE <p> <span> <div> (nécessit
     if hyper == "oui":
         texte = ajout_hyperlien(texte)
     choix = print_where()
-    fd = open('index.html', 'r')
+    fd = open('web/index.html', 'r')
     oui = fd.readlines()
     fd.close()
     for i in range(len(oui)):
@@ -30,14 +30,14 @@ def ajout_element(element,texte): #PERMET L'AJOUT DE <p> <span> <div> (nécessit
                     oui.insert(i+1, '<{} class="{}">{}</{}>\n'.format(element,identifiant, texte,element))
                 else :
                     oui.insert(i+1, "<{}>{}</{}>\n".format(element,texte,element))
-    fd = open('index.html', 'w')
+    fd = open('web/index.html', 'w')
     oui = "".join(oui)
     fd.write(oui)
     fd.close()
 
 def ajout_menu(): #AJOUTE UN MENU MAIS SANS LES HYPERLIENS POUR L'INSTANT (nécessite une fonction pour créer les hyperliens)
     choix = print_where()
-    fd = open('index.html', 'r')
+    fd = open('web/index.html', 'r')
     oui = fd.readlines()
     fd.close()
     for i in range(len(oui)):
@@ -51,14 +51,14 @@ def ajout_menu(): #AJOUTE UN MENU MAIS SANS LES HYPERLIENS POUR L'INSTANT (néce
                 oui.insert(i+1+j, '<li>{}</li>\n'.format(texte))
             oui.insert(i+2+nombre, '</ul>\n')
             break
-    fd = open('index.html', 'w')
+    fd = open('web/index.html', 'w')
     oui = "".join(oui)
     fd.write(oui)
     fd.close()
 
 def ajout_block(element):
     choix = print_where()
-    fd = open('index.html', 'r')
+    fd = open('web/index.html', 'r')
     oui = fd.readlines()
     fd.close()
     for i in range(len(oui)):
@@ -77,20 +77,20 @@ def ajout_block(element):
                     oui.insert(i+1, '<{}>\n'.format(element))
             oui.insert(i+2, '</{}>\n'.format(element))
             break
-    fd = open('index.html', 'w')
+    fd = open('web/index.html', 'w')
     oui = "".join(oui)
     fd.write(oui)
     fd.close()
     
 def base_html(): #CREER LA STRUCTURE HTML DE BASE
-    fd = open('index.html', 'w')
+    fd = open('web/index.html', 'w')
     fd.write("<!doctype html>\n\t<html lang='fr'>\n\t\t<head>\n\t\t\t<meta charset='utf-8'>\n\t\t\t<title>Titre de la page</title>\n\t\t\t<link rel='stylesheet' href='style.css'>\n\t\t\t<script src='script.js'></script>\n\t\t</head>\n\t\t<body>")
     fd.write("\n\t\t</body>\n\t</html>")
     fd.close()
 
 if __name__ == '__main__':
     try:
-        if os.stat("index.html").st_size == 0:
+        if os.stat("web/index.html").st_size == 0:
             base_html()
     except:
         base_html()
