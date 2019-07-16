@@ -50,11 +50,37 @@ def ajout_menu(): #AJOUTE UN MENU MAIS SANS LES HYPERLIENS POUR L'INSTANT (néce
                 texte = ajout_hyperlien(texte)
                 oui.insert(i+1+j, '<li>{}</li>\n'.format(texte))
             oui.insert(i+2+nombre, '</ul>\n')
+            break
     fd = open('index.html', 'w')
     oui = "".join(oui)
     fd.write(oui)
     fd.close()
 
+def ajout_block(element):
+    choix = print_where()
+    fd = open('index.html', 'r')
+    oui = fd.readlines()
+    fd.close()
+    for i in range(len(oui)):
+        if choix in oui[i]:
+            print(oui[i])
+            choix2 = input("Voulez vous ajouter un id à l'élément (cela permettra de le cibler plus facilement) ?")
+            if choix2 == 'oui':
+                identifiant = input("Entrez son identifiant :")
+                oui.insert(i+1, '<{} id="{}">\n'.format(element, identifiant))
+            else:
+                choix_classe = input("Voulez vous ajouter une class à l'élément (cela permettra de le cibler plus facilement) ?")
+                if choix_classe == 'oui':
+                    identifiant = input("Entrez sa classe :")
+                    oui.insert(i+1, '<{} class="{}">\n'.format(element,identifiant))
+                else:
+                    oui.insert(i+1, '<{}>\n'.format(element))
+            oui.insert(i+2, '</{}>\n'.format(element))
+            break
+    fd = open('index.html', 'w')
+    oui = "".join(oui)
+    fd.write(oui)
+    fd.close()
     
 def base_html(): #CREER LA STRUCTURE HTML DE BASE
     fd = open('index.html', 'w')
