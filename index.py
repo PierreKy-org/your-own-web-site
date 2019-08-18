@@ -88,9 +88,3 @@ def base_html(): #CREER LA STRUCTURE HTML DE BASE
     fd.write("\n\t\t</body>\n\t</html>")
     fd.close()
 
-if __name__ == '__main__':
-    try:
-        if os.stat("web/index.html").st_size == 0:
-            base_html()
-    except:
-        base_html()
