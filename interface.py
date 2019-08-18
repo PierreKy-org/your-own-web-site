@@ -1,4 +1,4 @@
-from tkinter import Tk, Button, Entry, Label, messagebox, Radiobutton, IntVar
+from tkinter import Tk, Button, Entry, Label, messagebox, Radiobutton, StringVar
 from functools import partial
 from threading import Thread
 import os
@@ -8,12 +8,13 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 import index
 
-try:
-    if os.stat("web/index.html").st_size == 0:
-        index.base_html()
-except:
+choix = ['p', 'h1', 'h2', 'nav', 'div', 'section', 'article']
+if not os.path.isdir('web'):
+    os.mkdir('web')
     index.base_html()
-
+else :
+    if os.stat("index.html").st_size == 0:
+        index.base_html()
 def on_closing():
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
         root.destroy()
@@ -41,7 +42,7 @@ class ViewHtml(Thread):
             time.sleep(2)
             self.driver.refresh()
     def enter_click(self):
-        index.ajout_element(qb2.get(),comment.get())
+        index.ajout_element(varGr.get(),comment.get())
         self.driver.refresh()
     def fini(self):
         self.oui = False
@@ -60,17 +61,21 @@ qb = Button(root, text='Quitter', command=partial(Web.fini))
 qb.pack()
 text = Label(root, text="Entrer l'élément à ajouter sur votre site : ")
 text.pack()
-qb2 = Entry(root, width=10)
-qb2.pack()
+
+varGr = StringVar()
+for i in range(len(choix)):
+    b = Radiobutton(root, variable=varGr,text=choix[i], value=choix[i])
+    b.pack()
+
 comment = Entry(root, width=10)
 comment.pack()
+
 valide = Button(root, text='Valider', command=partial(Web.enter_click))
 valide.pack()
 
 test = Button(root, text='TEST THREAD', command=partial(test))
 test.pack()
-b = Radiobutton(root, text='slt', value='p')
-b.pack()
+
 
 root.mainloop()
 
