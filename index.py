@@ -1,38 +1,34 @@
 import os
-def print_where():
-    choix = input("Ou voulez-vous ajouter votre élément ?")
-    return choix
+from tkinter import messagebox
 
 def ajout_hyperlien(texte):
     choix = input('donnez votre URL')
     texte = '<a href="{}">{}</a>'.format(choix, texte)
     return texte
 
-def ajout_element(element,texte): #PERMET L'AJOUT DE <p> <span> <div> (nécessite l'intégration du <li>) (le reste nécessite une autre fonction car pas adapter)
-    hyper = input("Voulez-vous un lien sur votre élément ?")
-    if hyper == "oui":
-        texte = ajout_hyperlien(texte)
-    choix = print_where()
+def ajout_element(element,texte, ciblage, identifiant=None, clas=None): #PERMET L'AJOUT DE <p> <span> <div> (nécessite l'intégration du <li>) (le reste nécessite une autre fonction car pas adapter)
     fd = open('web/index.html', 'r')
-    oui = fd.readlines()
+    dom = fd.readlines()
     fd.close()
-    for i in range(len(oui)):
-        if choix in oui[i]:
-            print( oui[i])
-            choix = input("Voulez vous ajouter un id à l'élément (cela permettra de le cibler plus facilement) ?")
-            if choix == 'oui':
-                identifiant = input("Entrez son identifiant :")
-                oui.insert(i+1, '<{} id="{}">{}</{}>\n'.format(element,identifiant,texte,element))
+    for i in range(len(dom)):
+        if ciblage in dom[i]:
+            print( dom[i])
+            if identifiant and clas:
+                dom.insert(i+1, '<{} id="{}" class="{}">{}</{}>\n'.format(element,identifiant,clas,texte,element))
+                break
+            if identifiant:
+                dom.insert(i+1, '<{} id="{}">{}</{}>\n'.format(element,identifiant,texte,element))
+                break
             else:
-                choix_classe = input("Voulez vous ajouter une class à l'élément (cela permettra de le cibler plus facilement) ?")
-                if choix_classe == 'oui':
-                    identifiant = input("Entrez sa classe :")
-                    oui.insert(i+1, '<{} class="{}">{}</{}>\n'.format(element,identifiant, texte,element))
+                if clas:
+                    dom.insert(i+1, '<{} class="{}">{}</{}>\n'.format(element,clas, texte,element))
+                    break
                 else :
-                    oui.insert(i+1, "<{}>{}</{}>\n".format(element,texte,element))
+                    dom.insert(i+1, "<{}>{}</{}>\n".format(element,texte,element))
+                    break
     fd = open('web/index.html', 'w')
-    oui = "".join(oui)
-    fd.write(oui)
+    dom = "".join(dom)
+    fd.write(dom)
     fd.close()
 
 def ajout_menu(): #AJOUTE UN MENU MAIS SANS LES HYPERLIENS POUR L'INSTANT (nécessite une fonction pour créer les hyperliens)
