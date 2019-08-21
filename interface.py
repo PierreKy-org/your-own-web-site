@@ -8,8 +8,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 import index
 
-choix = ['p', 'h1', 'h2', 'nav', 'div', 'section', 'article']
-choixStr = ['Paragraphe', 'Titre principale', 'Titre', 'Navigation', 'Balise basique', 'Section', 'Article']
+choix = ['p', 'h1', 'h2']
+choixStr = ['Paragraphe', 'Titre principale', 'Titre']
+
+choixB = ['nav','div','section','article']
+choixBlock = ['Navigation', 'Balise basique', 'Section', 'Article']
 if not os.path.isdir('web'):
     os.mkdir('web')
     index.base_html()
@@ -36,7 +39,7 @@ def verif(provenance):
         else:
             messagebox.showwarning("Champ vide", "Veuillez choisir un type d'élément et son contenu !")
     if provenance == 'menu':
-        if nombre_puce.get() in '123456789':
+        if nombre_puce.get() in '123456789' and nombre_puce.get() != '':
             raise_frame(fenCiblage)
             retour = Button(fenCiblage, text='Retour', command=partial(raise_frame, fenMenu))
             retour.grid(column=0,row=0)
@@ -79,21 +82,28 @@ class ViewHtml(Thread):
         
     def enter_click(self, provenance):
         raise_frame(base)
+        if ciblage.get(1.0, "end-1c") == '':
+            cible = 'body'
+        else :
+            cible = ciblage.get(1.0, "end-1c")
         if provenance == 'element':
-            index.ajout_element(varGr.get(),comment.get(1.0, "end-1c"), ciblage.get(1.0, "end-1c"), identifiant.get(), clas.get())
+            index.ajout_element(varGr.get(),comment.get(1.0, "end-1c"), cible, identifiant.get(), clas.get())
             ciblage.delete(1.0, "end-1c")
+            cible = 'body'
         if provenance == 'block':
-            index.ajout_block(varGr2.get(), ciblage.get(1.0, "end-1c"), identifiant.get(), clas.get())
+            index.ajout_block(varGr2.get(), cible, identifiant.get(), clas.get())
             ciblage.delete(1.0, "end-1c")
+            cible = 'body'
         if provenance == 'menu':
             raise_frame(fenLien)
         if provenance == 'menu2':
             global globalLien
-            index.ajout_menu(nombre_puce.get(), globalLien, ciblage.get(1.0, "end-1c"))
+            index.ajout_menu(nombre_puce.get(), globalLien, cible)
             globalLien = [list(), list()]
             validePuce = Button(fenLien, text='Valider', command=partial(ajoutListe, globalLien))
             validePuce.grid(column=4,row=4, pady=20, padx=180)
             ciblage.delete(1.0, "end-1c")
+            cible = 'body'
         self.driver.refresh()
         comment.delete(1.0, "end-1c")
 
@@ -118,7 +128,7 @@ Web.start()
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.geometry("700x500+0+100")
 root.propagate(0)
-root.title('Simple exemple')
+root.title('Your own web site')
 
 #MENU PRINCIPALE
 qb = Button(base, text='Quitter', command=partial(on_closing))
@@ -151,6 +161,9 @@ ajoutMenu.grid(column=3,row=1, padx =20)
 
 #FENETRE AJOUT MENU
 
+qb = Button(fenMenu, text='Retour au menu', command=partial(raise_frame, base))
+qb.grid(column=0,row=0)
+
 textPuce = Label(fenMenu, text="Entrer le nombre de lien que votre menu comporte :")
 textPuce.grid(column=1,row=0)
 
@@ -169,7 +182,11 @@ validePuce.grid(column=8,row=9, pady=20, padx=180)
 
 
 #FENETRE AJOUT LIEN
-     
+
+qb = Button(fenLien, text='Retour au menu', command=partial(raise_frame, fenMenu))
+qb.grid(column=0,row=0)
+
+
 textLien = Label(fenLien, text="Entrer le texte et son lien :")
 textLien.grid(column=1,row=0)
 
@@ -245,7 +262,7 @@ text.grid(column=0,row=1, columnspan=4, pady=50)
 
 varGr2 = StringVar()
 for i in range(len(choix)):
-    b = Radiobutton(fenAjoutBlock, variable=varGr2,text=choixStr[i], value=choix[i], tristatevalue="x")
+    b = Radiobutton(fenAjoutBlock, variable=varGr2,text=choixBlock[i], value=choixB[i], tristatevalue="x")
     b.grid(column=1,row=i+2)
 
 valide = Button(fenAjoutBlock, text='Valider', command=partial(verif, 'block'))

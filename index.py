@@ -1,7 +1,8 @@
 import os
 
 
-def ajout_element(element,texte, ciblage='body', identifiant=None, clas=None): #PERMET L'AJOUT DE <p> <span> <div> (nécessite l'intégration du <li>) (le reste nécessite une autre fonction car pas adapter)
+def ajout_element(element,texte, ciblage, identifiant=None, clas=None): #PERMET L'AJOUT DE <p> <span> <div> (nécessite l'intégration du <li>) (le reste nécessite une autre fonction car pas adapter)
+    
     fd = open('web/index.html', 'r')
     dom = fd.readlines()
     fd.close()
