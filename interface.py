@@ -3,16 +3,18 @@ from functools import partial
 from threading import Thread
 import os
 import time
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
 import index
+import webview
 
+
+global globalLien
+globalLien = [list(), list()]
 choix = ['p', 'h1', 'h2']
 choixStr = ['Paragraphe', 'Titre principale', 'Titre']
 
 choixB = ['nav','div','section','article']
 choixBlock = ['Navigation', 'Balise basique', 'Section', 'Article']
+
 if not os.path.isdir('web'):
     os.mkdir('web')
     index.base_html()
@@ -22,283 +24,282 @@ else :
             index.base_html()
     else:
         index.base_html()
-def on_closing():
-    if messagebox.askokcancel("Quit", "Do you want to quit?"):
-        root.destroy()
-        Web.driver.close()
 
 def raise_frame(frame):
     frame.tkraise()
+def letgo():
+    Web = ViewHtml()
+    Web.start()
 
-def verif(provenance):
-    if provenance == 'block':
-        if varGr2.get():
-            raise_frame(fenCiblage)
-            retour = Button(fenCiblage, text='Retour', command=partial(raise_frame, fenAjoutBlock))
-            retour.grid(column=0,row=0)
-        else:
-            messagebox.showwarning("Champ vide", "Veuillez choisir un type d'élément et son contenu !")
-    if provenance == 'menu':
-        if nombre_puce.get() in '123456789' and nombre_puce.get() != '':
-            raise_frame(fenCiblage)
-            retour = Button(fenCiblage, text='Retour', command=partial(raise_frame, fenMenu))
-            retour.grid(column=0,row=0)
-        else:
-            messagebox.showwarning("Champ incorrect", "Veuillez choisir un nombre !")
-    if provenance == 'element':
-        if varGr.get() and comment.get(1.0, "end-1c"):
-            raise_frame(fenCiblage)
-            retour = Button(fenCiblage, text='Retour', command=partial(raise_frame, fenAjoutElement))
-            retour.grid(column=0,row=0)
-        else:
-            messagebox.showwarning("Champ vide", "Veuillez choisir un type d'élément et son contenu !")
-    valider = Button(fenCiblage, text='Valider', command=partial(Web.enter_click, provenance))
-    valider.grid(column=1,row=13)
-
-def ajoutListe(liste):
-    liste[0].append(textePuce.get())
-    liste[1].append(adresse.get())
-    
-    textePuce.delete(0, 100)
-    adresse.delete(0, 100)
-    acc = len(liste[0])
-    if acc >= int(nombre_puce.get()):
-        validePuce = Button(fenLien, text='Fini !', command=partial(Web.enter_click, 'menu2'))
-        validePuce.grid(column=4,row=4, pady=20, padx=180)
-        fenLien.update()
 
 class ViewHtml(Thread):
 
     def __init__(self):
         Thread.__init__(self)
     def run(self):
-        chrome_options = Options()
-        html_file = os.getcwd() + "//" + "web/index.html"
-        chrome_options.add_argument("--app=file:///" + html_file)
-        chrome_options.add_argument("--window-size=600,539")
-        chrome_options.add_argument("--window-position=701,100")
-        self.driver = webdriver.Chrome(chrome_options=chrome_options)
-        assert "No results found." not in self.driver.page_source
+        self.root = Tk()
+
+        self.base = Frame(self.root)
+        self.fenCiblage = Frame(self.root)
+        self.fenAjoutElement = Frame(self.root)
+        self.fenAjoutBlock = Frame(self.root)
+        self.fenMenu = Frame(self.root)
+        self.fenLien = Frame(self.root)
+
         
+        for frame in (self.base, self.fenCiblage, self.fenAjoutElement, self.fenAjoutBlock, self.fenMenu, self.fenLien):
+            frame.grid(row=0, column=0, sticky='news')
+
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.root.geometry("700x500+0+100")
+        self.root.propagate(0)
+        self.root.title('Your own web site')
+
+
+                #MENU PRINCIPALE
+        self.qb = Button(self.base, text='Quitter', command=partial(self.on_closing))
+        self.qb.grid(column=0,row=0)
+
+        self.ajoutElem = Button(self.base, text='Ajouter un élément', command=partial(raise_frame, self.fenAjoutElement))
+        self.ajoutElem.grid(column=1,row=1, padx =20)
+
+        self.ajoutBlock = Button(self.base, text='Ajouter un block', command=partial(raise_frame, self.fenAjoutBlock))
+        self.ajoutBlock.grid(column=2,row=1, padx =20)
+
+        self.ajoutMenu = Button(self.base, text='Ajouter un menu', command=partial(raise_frame, self.fenMenu))
+        self.ajoutMenu.grid(column=3,row=1, padx =20)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #FENETRE AJOUT MENU
+
+        self.qbmenu = Button(self.fenMenu, text='Retour au menu', command=partial(raise_frame, self.base))
+        self.qbmenu.grid(column=0,row=0)
+
+        self.textPuce = Label(self.fenMenu, text="Entrer le nombre de lien que votre menu comporte :")
+        self.textPuce.grid(column=1,row=0)
+
+        self.nombre_puce = Entry(self.fenMenu)
+        self.nombre_puce.grid(column=1,row=1)
+
+        self.validePuce = Button(self.fenMenu, text='Valider', command=partial(self.verif, 'menu'))
+        self.validePuce.grid(column=8,row=9, pady=20, padx=180)
+
+
+
+
+
+
+
+
+
+        #FENETRE AJOUT LIEN
+
+        self.qblien = Button(self.fenLien, text='Retour au menu', command=partial(raise_frame, self.fenMenu))
+        self.qblien.grid(column=0,row=0)
+
+
+        self.textLien = Label(self.fenLien, text="Entrer le texte et son lien :")
+        self.textLien.grid(column=1,row=0)
+
+        self.textePuce = Entry(self.fenLien)
+        self.textePuce.grid(column=1,row=1)
+
+        self.adresse = Entry(self.fenLien)
+        self.adresse.grid(column=2,row=1)
+
+        self.validePuce = Button(self.fenLien, text='Valider', command=partial(self.ajoutListe, globalLien))
+        self.validePuce.grid(column=4,row=4, pady=20, padx=180)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #FENETRE D'AJOUT D'ELEMENT
+        self.qbelem = Button(self.fenAjoutElement, text='Retour au menu', command=partial(raise_frame, self.base))
+        self.qbelem.grid(column=0,row=0)
+
+        self.text = Label(self.fenAjoutElement, text="Choisisser l'élément à ajouter sur votre site : ")
+        self.text.grid(column=0,row=1, columnspan=4, pady=50)
+
+        self.varGr = StringVar()
+        for i in range(len(choix)):
+            self.b = Radiobutton(self.fenAjoutElement, variable=self.varGr,text=choixStr[i], value=choix[i], tristatevalue="x")
+            self.b.grid(column=1,row=i+2)
+
+        self.text1 = Label(self.fenAjoutElement, text="Entrer le texte que possèdera l'élément : ")
+        self.text1.grid(column=5,row=1, columnspan=4)
+
+        self.comment = Text(self.fenAjoutElement, height=7, width=30)
+        self.comment.grid(column=5,row=2,columnspan=4, rowspan = 5)
+
+        self.retourLigne = Button(self.fenAjoutElement, text='Retour à la ligne', command=partial(self.comment.insert, "end-1c", '</br>'))
+        self.retourLigne.grid(column=1,row=9)
+
+
+        self.valide = Button(self.fenAjoutElement, text='Valider', command=partial(self.verif, 'element'))
+        self.valide.grid(column=8,row=9, pady=20, padx=180)
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #FENETRE AJOUT BLOCK
+        self.qbblock = Button(self.fenAjoutBlock, text='Retour au menu', command=partial(raise_frame, self.base))
+        self.qbblock.grid(column=0,row=0)
+
+        self.textblock = Label(self.fenAjoutBlock, text="Choisisser l'élément à ajouter sur votre site : ")
+        self.textblock.grid(column=0,row=1, columnspan=4, pady=50)
+
+        self.varGr2 = StringVar()
+        for i in range(len(choix)):
+            self.c = Radiobutton(self.fenAjoutBlock, variable=self.varGr2,text=choixBlock[i], value=choixB[i], tristatevalue="x")
+            self.c.grid(column=1,row=i+2)
+
+        self.validee = Button(self.fenAjoutBlock, text='Valider', command=partial(self.verif, 'block'))
+        self.validee.grid(column=8,row=9, pady=20, padx=180)
+
+
+
+
+
+
+
+
+
+        #FENETRE DE CIBLAGE
+
+        self.textCiblage = Label(self.fenCiblage, text="Entrer le texte d'un élément ou son id/class (votre texte sera juste en dessous) : ")
+        self.textCiblage.grid(column=0,row=1, columnspan=4, pady = 20)
+
+        self.ciblage = Text(self.fenCiblage, height=7, width=30)
+        self.ciblage.grid(column=0,row=2,columnspan=4, rowspan = 5)
+
+        self.textId = Label(self.fenCiblage, text="**Optionnel** Entrer un identifiant (cela permet de trouver votre élément plus facilement) : ")
+        self.textId.grid(column=0,row=9)
+
+        self.identifiant = Entry(self.fenCiblage)
+        self.identifiant.grid(column=0,row=10)
+
+        self.textClass = Label(self.fenCiblage, text="**Optionnel** Entrer une class (cela permet de trouver votre élément plus facilement) : ")
+        self.textClass.grid(column=0,row=11)
+
+        self.clas = Entry(self.fenCiblage)
+        self.clas.grid(column=0,row=12)
+
+
+
+        raise_frame(self.base)
+        self.root.mainloop()
+
     def enter_click(self, provenance):
-        raise_frame(base)
-        if ciblage.get(1.0, "end-1c") == '':
+        raise_frame(self.base)
+        if self.ciblage.get(1.0, "end-1c") == '':
             cible = 'body'
         else :
-            cible = ciblage.get(1.0, "end-1c")
+            cible = self.ciblage.get(1.0, "end-1c")
         if provenance == 'element':
-            index.ajout_element(varGr.get(),comment.get(1.0, "end-1c"), cible, identifiant.get(), clas.get())
-            ciblage.delete(1.0, "end-1c")
+            index.ajout_element(self.varGr.get(),self.comment.get(1.0, "end-1c"), cible, self.identifiant.get(), self.clas.get())
+            self.ciblage.delete(1.0, "end-1c")
             cible = 'body'
         if provenance == 'block':
-            index.ajout_block(varGr2.get(), cible, identifiant.get(), clas.get())
-            ciblage.delete(1.0, "end-1c")
+            index.ajout_block(self.varGr2.get(), cible, self.identifiant.get(), self.clas.get())
+            self.ciblage.delete(1.0, "end-1c")
             cible = 'body'
         if provenance == 'menu':
-            raise_frame(fenLien)
+            raise_frame(self.fenLien)
         if provenance == 'menu2':
             global globalLien
-            index.ajout_menu(nombre_puce.get(), globalLien, cible)
+            index.ajout_menu(self.nombre_puce.get(), globalLien, cible)
             globalLien = [list(), list()]
-            validePuce = Button(fenLien, text='Valider', command=partial(ajoutListe, globalLien))
-            validePuce.grid(column=4,row=4, pady=20, padx=180)
-            ciblage.delete(1.0, "end-1c")
+            self.validePuce = Button(self.fenLien, text='Valider', command=partial(self.ajoutListe, globalLien))
+            self.validePuce.grid(column=4,row=4, pady=20, padx=180)
+            self.ciblage.delete(1.0, "end-1c")
             cible = 'body'
-        self.driver.refresh()
-        comment.delete(1.0, "end-1c")
+        html_file = os.getcwd() + "//" + "web/index.html"
+        window.load_url('file://' + html_file)
+        self.comment.delete(1.0, "end-1c")
+
+    def ajoutListe(self, liste):
+        liste[0].append(self.textePuce.get())
+        liste[1].append(self.adresse.get())
+    
+        self.textePuce.delete(0, 100)
+        self.adresse.delete(0, 100)
+        acc = len(liste[0])
+        if acc >= int(self.nombre_puce.get()):
+            self.validePuce = Button(self.fenLien, text='Fini !', command=partial(self.enter_click, 'menu2'))
+            self.validePuce.grid(column=4,row=4, pady=20, padx=180)
+            self.fenLien.update()
+
+    def on_closing(self):
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            self.root.destroy()
+            window.destroy()
+
+    def verif(self,provenance):
+        if provenance == 'block':
+            if self.varGr2.get():
+                raise_frame(self.fenCiblage)
+                self.retour = Button(self.fenCiblage, text='Retour', command=partial(raise_frame, self.fenAjoutBlock))
+                self.retour.grid(column=0,row=0)
+            else:
+                messagebox.showwarning("Champ vide", "Veuillez choisir un type d'élément et son contenu !")
+        if provenance == 'menu':
+            if self.nombre_puce.get() in '123456789' and self.nombre_puce.get() != '':
+                raise_frame(self.fenCiblage)
+                self.retour = Button(self.fenCiblage, text='Retour', command=partial(raise_frame, self.fenMenu))
+                self.retour.grid(column=0,row=0)
+            else:
+                messagebox.showwarning("Champ incorrect", "Veuillez choisir un nombre !")
+        if provenance == 'element':
+            if self.varGr.get() and self.comment.get(1.0, "end-1c"):
+                raise_frame(self.fenCiblage)
+                self.retour = Button(self.fenCiblage, text='Retour', command=partial(raise_frame, self.fenAjoutElement))
+                self.retour.grid(column=0,row=0)
+            else:
+                messagebox.showwarning("Champ vide", "Veuillez choisir un type d'élément et son contenu !")
+        self.valider = Button(self.fenCiblage, text='Valider', command=partial(self.enter_click, provenance))
+        self.valider.grid(column=1,row=13)
+
+html_file = os.getcwd() + "//" + "web/index.html"
+window = webview.create_window('Vue', 'file://' + html_file, width=500, height = 500)
+webview.start(letgo())
 
-
-Web = ViewHtml()
-global globalLien
-globalLien = [list(), list()]
-root = Tk()
-
-base = Frame(root)
-fenCiblage = Frame(root)
-fenAjoutElement = Frame(root)
-fenAjoutBlock = Frame(root)
-fenMenu = Frame(root)
-fenLien = Frame(root)
-
-for frame in (base, fenCiblage, fenAjoutElement, fenAjoutBlock, fenMenu, fenLien):
-    frame.grid(row=0, column=0, sticky='news')
-
-
-Web.start()
-root.protocol("WM_DELETE_WINDOW", on_closing)
-root.geometry("700x500+0+100")
-root.propagate(0)
-root.title('Your own web site')
-
-#MENU PRINCIPALE
-qb = Button(base, text='Quitter', command=partial(on_closing))
-qb.grid(column=0,row=0)
-
-ajoutElem = Button(base, text='Ajouter un élément', command=partial(raise_frame, fenAjoutElement))
-ajoutElem.grid(column=1,row=1, padx =20)
-
-ajoutBlock = Button(base, text='Ajouter un block', command=partial(raise_frame, fenAjoutBlock))
-ajoutBlock.grid(column=2,row=1, padx =20)
-
-ajoutMenu = Button(base, text='Ajouter un menu', command=partial(raise_frame, fenMenu))
-ajoutMenu.grid(column=3,row=1, padx =20)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#FENETRE AJOUT MENU
-
-qb = Button(fenMenu, text='Retour au menu', command=partial(raise_frame, base))
-qb.grid(column=0,row=0)
-
-textPuce = Label(fenMenu, text="Entrer le nombre de lien que votre menu comporte :")
-textPuce.grid(column=1,row=0)
-
-nombre_puce = Entry(fenMenu)
-nombre_puce.grid(column=1,row=1)
-
-validePuce = Button(fenMenu, text='Valider', command=partial(verif, 'menu'))
-validePuce.grid(column=8,row=9, pady=20, padx=180)
-
-
-
-
-
-
-
-
-
-#FENETRE AJOUT LIEN
-
-qb = Button(fenLien, text='Retour au menu', command=partial(raise_frame, fenMenu))
-qb.grid(column=0,row=0)
-
-
-textLien = Label(fenLien, text="Entrer le texte et son lien :")
-textLien.grid(column=1,row=0)
-
-textePuce = Entry(fenLien)
-textePuce.grid(column=1,row=1)
-
-adresse = Entry(fenLien)
-adresse.grid(column=2,row=1)
-
-validePuce = Button(fenLien, text='Valider', command=partial(ajoutListe, globalLien))
-validePuce.grid(column=4,row=4, pady=20, padx=180)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#FENETRE D'AJOUT D'ELEMENT
-qb = Button(fenAjoutElement, text='Retour au menu', command=partial(raise_frame, base))
-qb.grid(column=0,row=0)
-
-text = Label(fenAjoutElement, text="Choisisser l'élément à ajouter sur votre site : ")
-text.grid(column=0,row=1, columnspan=4, pady=50)
-
-varGr = StringVar()
-for i in range(len(choix)):
-    b = Radiobutton(fenAjoutElement, variable=varGr,text=choixStr[i], value=choix[i], tristatevalue="x")
-    b.grid(column=1,row=i+2)
-
-text1 = Label(fenAjoutElement, text="Entrer le texte que possèdera l'élément : ")
-text1.grid(column=5,row=1, columnspan=4)
-
-comment = Text(fenAjoutElement, height=7, width=30)
-comment.grid(column=5,row=2,columnspan=4, rowspan = 5)
-
-retourLigne = Button(fenAjoutElement, text='Retour à la ligne', command=partial(comment.insert, "end-1c", '</br>'))
-retourLigne.grid(column=1,row=9)
-
-
-valide = Button(fenAjoutElement, text='Valider', command=partial(verif, 'element'))
-valide.grid(column=8,row=9, pady=20, padx=180)
-
-
-
-
-
-
-
-
-
-
-
-
-
-#FENETRE AJOUT BLOCK
-qb = Button(fenAjoutBlock, text='Retour au menu', command=partial(raise_frame, base))
-qb.grid(column=0,row=0)
-
-text = Label(fenAjoutBlock, text="Choisisser l'élément à ajouter sur votre site : ")
-text.grid(column=0,row=1, columnspan=4, pady=50)
-
-varGr2 = StringVar()
-for i in range(len(choix)):
-    b = Radiobutton(fenAjoutBlock, variable=varGr2,text=choixBlock[i], value=choixB[i], tristatevalue="x")
-    b.grid(column=1,row=i+2)
-
-valide = Button(fenAjoutBlock, text='Valider', command=partial(verif, 'block'))
-valide.grid(column=8,row=9, pady=20, padx=180)
-
-
-
-
-
-
-
-
-
-#FENETRE DE CIBLAGE
-
-textCiblage = Label(fenCiblage, text="Entrer le texte d'un élément ou son id/class (votre texte sera juste en dessous) : ")
-textCiblage.grid(column=0,row=1, columnspan=4, pady = 20)
-
-ciblage = Text(fenCiblage, height=7, width=30)
-ciblage.grid(column=0,row=2,columnspan=4, rowspan = 5)
-
-textId = Label(fenCiblage, text="**Optionnel** Entrer un identifiant (cela permet de trouver votre élément plus facilement) : ")
-textId.grid(column=0,row=9)
-
-identifiant = Entry(fenCiblage)
-identifiant.grid(column=0,row=10)
-
-textClass = Label(fenCiblage, text="**Optionnel** Entrer une class (cela permet de trouver votre élément plus facilement) : ")
-textClass.grid(column=0,row=11)
-
-clas = Entry(fenCiblage)
-clas.grid(column=0,row=12)
-
-
-
-raise_frame(base)
-root.mainloop()
 
 
