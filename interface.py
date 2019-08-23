@@ -5,12 +5,13 @@ import os
 import time
 import index
 import webview
+import functionCss
 
-
+global lienSansListe
 global globalLien
 globalLien = [list(), list()]
-choix = ['p', 'h1', 'h2']
-choixStr = ['Paragraphe', 'Titre principale', 'Titre']
+choix = ['p', 'h1', 'h2', 'li']
+choixStr = ['Paragraphe', 'Titre principale', 'Titre', 'Puce liste']
 
 choixB = ['nav','div','section','article']
 choixBlock = ['Navigation', 'Balise basique', 'Section', 'Article']
@@ -18,12 +19,15 @@ choixBlock = ['Navigation', 'Balise basique', 'Section', 'Article']
 if not os.path.isdir('web'):
     os.mkdir('web')
     index.base_html()
+    functionCss.addCss()
 else :
     if os.path.isfile("web/index.html"):
         if os.stat("web/index.html").st_size == 0:
             index.base_html()
+            functionCss.addCss()
     else:
         index.base_html()
+        functionCss.addCss()
 
 def raise_frame(frame):
     frame.tkraise()
@@ -45,9 +49,10 @@ class ViewHtml(Thread):
         self.fenAjoutBlock = Frame(self.root)
         self.fenMenu = Frame(self.root)
         self.fenLien = Frame(self.root)
+        self.fenCss = Frame(self.root)
 
         
-        for frame in (self.base, self.fenCiblage, self.fenAjoutElement, self.fenAjoutBlock, self.fenMenu, self.fenLien):
+        for frame in (self.base, self.fenCiblage, self.fenAjoutElement, self.fenAjoutBlock, self.fenMenu, self.fenLien, self.fenCss):
             frame.grid(row=0, column=0, sticky='news')
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -69,10 +74,34 @@ class ViewHtml(Thread):
         self.ajoutMenu = Button(self.base, text='Ajouter un menu', command=partial(raise_frame, self.fenMenu))
         self.ajoutMenu.grid(column=3,row=1, padx =20)
 
+        self.css = Button(self.base, text='Ajouter du CSS', command=partial(raise_frame, self.fenCss))
+        self.css.grid(column=4,row=1, padx =20)
 
 
 
 
+
+
+
+
+
+
+
+
+
+        #FENETRE CSS
+
+        self.qbcss = Button(self.fenCss, text='Retour au menu', command=partial(raise_frame, self.base))
+        self.qbcss.grid(column=0,row=0)
+
+        self.textcss = Label(self.fenCss, text="Entrer l'élément à personnaliser (cela peut aussi être un block, un id ou une class !) :")
+        self.textcss.grid(column=1,row=0, columnspan=5)
+
+        self.cibleCss = Entry(self.fenCss)
+        self.cibleCss.grid(column=1,row=1)
+
+        self.validecss = Button(self.fenCss, text='Valider', command=partial(self.verif, 'css'))
+        self.validecss.grid(column=5,row=4, pady=20)
 
 
 
@@ -109,8 +138,6 @@ class ViewHtml(Thread):
 
         #FENETRE AJOUT LIEN
 
-        self.qblien = Button(self.fenLien, text='Retour au menu', command=partial(raise_frame, self.fenMenu))
-        self.qblien.grid(column=0,row=0)
 
 
         self.textLien = Label(self.fenLien, text="Entrer le texte et son lien :")
@@ -162,6 +189,9 @@ class ViewHtml(Thread):
 
         self.retourLigne = Button(self.fenAjoutElement, text='Retour à la ligne', command=partial(self.comment.insert, "end-1c", '</br>'))
         self.retourLigne.grid(column=1,row=9)
+
+        self.ajoutLienElem = Button(self.fenAjoutElement, text='Ajoute un lien', command=partial(self.verif, 'lien'))
+        self.ajoutLienElem.grid(column=2,row=9)
 
 
         self.valide = Button(self.fenAjoutElement, text='Valider', command=partial(self.verif, 'element'))
@@ -237,19 +267,28 @@ class ViewHtml(Thread):
             index.ajout_element(self.varGr.get(),self.comment.get(1.0, "end-1c"), cible, self.identifiant.get(), self.clas.get())
             self.ciblage.delete(1.0, "end-1c")
             cible = 'body'
+        if provenance == 'lien':
+            index.ajout_element(self.varGr.get(),lienSansListe, cible, self.identifiant.get(), self.clas.get())
+            self.ciblage.delete(1.0, "end-1c")
+            self.qblien.destroy()
+            cible = 'body'
         if provenance == 'block':
             index.ajout_block(self.varGr2.get(), cible, self.identifiant.get(), self.clas.get())
             self.ciblage.delete(1.0, "end-1c")
             cible = 'body'
         if provenance == 'menu':
+            self.qblien = Button(self.fenLien, text='Retour au menu', command=partial(self.endWithDestroy, self.fenMenu))
+            self.qblien.grid(column=0,row=0)
             raise_frame(self.fenLien)
         if provenance == 'menu2':
             global globalLien
             index.ajout_menu(self.nombre_puce.get(), globalLien, cible)
             globalLien = [list(), list()]
+            self.validePuce.destroy()
             self.validePuce = Button(self.fenLien, text='Valider', command=partial(self.ajoutListe, globalLien))
             self.validePuce.grid(column=4,row=4, pady=20, padx=180)
             self.ciblage.delete(1.0, "end-1c")
+            self.qblien.destroy()
             cible = 'body'
         html_file = os.getcwd() + "//" + "web/index.html"
         window.load_url('file://' + html_file)
@@ -263,16 +302,31 @@ class ViewHtml(Thread):
         self.adresse.delete(0, 100)
         acc = len(liste[0])
         if acc >= int(self.nombre_puce.get()):
+            self.validePuce.destroy()
             self.validePuce = Button(self.fenLien, text='Fini !', command=partial(self.enter_click, 'menu2'))
             self.validePuce.grid(column=4,row=4, pady=20, padx=180)
-            self.fenLien.update()
 
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             self.root.destroy()
             window.destroy()
 
+    def endWithDestroy(self, frame):
+        self.qblien.destroy()
+        raise_frame(frame)
+    def linkWithoutList(self, link, texte):
+        global lienSansListe
+        raise_frame(self.fenCiblage)
+        lienSansListe = '<a href="{}">{}</a>\n'.format(link.get(),texte.get())
     def verif(self,provenance):
+        if provenance == 'lien':
+            self.validePuce.destroy()
+            self.validePuce = Button(self.fenLien, text='Valider', command=partial(self.linkWithoutList, self.adresse, self.textePuce))
+            self.validePuce.grid(column=4,row=4, padx=20, pady=20)
+            self.qblien = Button(self.fenLien, text='Retour', command=partial(self.endWithDestroy, self.fenAjoutElement))
+            self.qblien.grid(column=0,row=0)
+            raise_frame(self.fenLien)
+
         if provenance == 'block':
             if self.varGr2.get():
                 raise_frame(self.fenCiblage)
@@ -298,7 +352,7 @@ class ViewHtml(Thread):
         self.valider.grid(column=1,row=13)
 
 html_file = os.getcwd() + "//" + "web/index.html"
-window = webview.create_window('Vue', 'file://' + html_file, width=500, height = 500)
+window = webview.create_window('Votre site !', 'file://' + html_file, width=500, height = 500)
 webview.start(letgo())
 
 

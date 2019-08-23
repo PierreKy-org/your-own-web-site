@@ -8,19 +8,38 @@ def ajout_element(element,texte, ciblage, identifiant=None, clas=None): #PERMET 
     fd.close()
     for i in range(len(dom)):
         if ciblage in dom[i]:
-            if identifiant and clas:
-                dom.insert(i+1, '<{} id="{}" class="{}">{}</{}>\n'.format(element,identifiant,clas,texte,element))
+            #Si on veut mettre en dessous d'une liste 
+            if '<li>' in dom[i] and element != 'li':
+                for i in range(len(dom)):
+                    if '</ul>' in dom[i]:
+                        if identifiant and clas:
+                            dom.insert(i+1, '<{} id="{}" class="{}">{}</{}>\n'.format(element,identifiant,clas,texte,element))
+                            break
+                        if identifiant:
+                            dom.insert(i+1, '<{} id="{}">{}</{}>\n'.format(element,identifiant,texte,element))
+                            break
+                        else:
+                            if clas:
+                                dom.insert(i+1, '<{} class="{}">{}</{}>\n'.format(element,clas, texte,element))
+                                break
+                            else :
+                                dom.insert(i+1, "<{}>{}</{}>\n".format(element,texte,element))
+                                break
                 break
-            if identifiant:
-                dom.insert(i+1, '<{} id="{}">{}</{}>\n'.format(element,identifiant,texte,element))
-                break
-            else:
-                if clas:
-                    dom.insert(i+1, '<{} class="{}">{}</{}>\n'.format(element,clas, texte,element))
+            else :
+                if identifiant and clas:
+                    dom.insert(i+1, '<{} id="{}" class="{}">{}</{}>\n'.format(element,identifiant,clas,texte,element))
                     break
-                else :
-                    dom.insert(i+1, "<{}>{}</{}>\n".format(element,texte,element))
+                if identifiant:
+                    dom.insert(i+1, '<{} id="{}">{}</{}>\n'.format(element,identifiant,texte,element))
                     break
+                else:
+                    if clas:
+                        dom.insert(i+1, '<{} class="{}">{}</{}>\n'.format(element,clas, texte,element))
+                        break
+                    else :
+                        dom.insert(i+1, "<{}>{}</{}>\n".format(element,texte,element))
+                        break
     fd = open('web/index.html', 'w')
     dom = "".join(dom)
     fd.write(dom)
@@ -71,7 +90,7 @@ def ajout_block(element, ciblage='body', identifiant=None, clas=None):
     
 def base_html(): #CREER LA STRUCTURE HTML DE BASE
     fd = open('web/index.html', 'w')
-    fd.write("<!doctype html>\n\t<html lang='fr'>\n\t\t<head>\n\t\t\t<meta charset='utf-8'>\n\t\t\t<title>Titre de la page</title>\n\t\t\t<link rel='stylesheet' href='style.css'>\n\t\t\t<script src='script.js'></script>\n\t\t</head>\n\t\t<body>")
+    fd.write("<!doctype html>\n\t<html lang='fr'>\n\t\t<head>\n\t\t\t<meta charset='utf-8'>\n\t\t\t<title>Titre de la page</title>\n\t\t\t<link href='style.css' rel='stylesheet'>\n\t\t\t<script src='script.js'></script>\n\t\t</head>\n\t\t<body>")
     fd.write("\n\t\t</body>\n\t</html>")
     fd.close()
 
